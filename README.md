@@ -1,6 +1,6 @@
 <div align="center">
 
-# codex-wrapped
+# codex-wrapped-bling
 
 **Your year in code, beautifully visualized.**
 
@@ -8,6 +8,7 @@
   <strong>Credit:</strong> Built on top of
   <a href="https://github.com/moddi3/opencode-wrapped">opencode-wrapped</a>
   by moddi3 (<a href="https://x.com/moddi3io">@moddi3io</a>).
+  This has been modified by Bingeljell (<a href="https://x.com/Bingeljell">@Bingeljell</a>).
 </p>
 <p>
   Found this useful? Follow <a href="https://x.com/nummanali">@nummanali</a> for more AI tooling!
