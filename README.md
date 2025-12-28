@@ -140,6 +140,16 @@ Releases are automated via [semantic-release](https://semantic-release.gitbook.i
 - **CLI UI**: [@clack/prompts](https://github.com/natemoo-re/clack)
 - **Font**: IBM Plex Mono
 
+## Third-Party Notices
+
+See `THIRD_PARTY_NOTICES.md` for third-party licenses and trademark notices.
+
+## Trademark Notice
+
+OpenAI and Codex are trademarks of OpenAI, LLC. The Codex name and logo are
+used for identification purposes only. No endorsement or affiliation is
+claimed.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

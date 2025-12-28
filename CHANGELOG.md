@@ -9,12 +9,14 @@ All notable changes to this project will be documented in this file.
 - **Time of Day Heatmap**: Added a 7x24 tokens heatmap by weekday/hour (local time).
 - **Top Projects**: Added a top-5 projects list ranked by token usage.
 - **Model Switching Stats**: Added total model switches and dominant model share to Usage Detail.
+- **Third-Party Notices**: Added third-party notices and the IBM Plex Mono OFL license text.
 
 ### Changed
 - **Data Pipeline**: Collector and stats now track project usage, hourly activity, and full model usage totals.
 - **Layout**: Increased canvas height and bottom padding; resized the time-of-day heatmap to fill its card width.
 - **Project Labels**: Display project basenames instead of full paths.
 - **Theme**: Updated the palette to an Electric Christmas scheme (neon red/green accents, warm whites, gold streaks).
+- **Documentation**: Added a trademark notice for the Codex name and logo.
 
 ### Fixed
 - **Satori Rendering**: Added explicit `display` styles to satisfy Satori's layout requirements.

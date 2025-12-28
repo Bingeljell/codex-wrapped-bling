@@ -2,8 +2,9 @@
   "name": "codex-wrapped-christmas",
   "version": "1.0.0",
   "author": {
-    "name": "Nikhil Shahane",
-    "email": "nikhil.shahane@gmail.com"
+    "name": "Bingeljell",
+    "email": "nikhil.shahane@proton.me",
+    "url": "https://github.com/bingeljell"
   },
   "description": "Generate a personalized Spotify Wrapped-style summary of your Codex usage",
   "homepage": "https://github.com/bingeljell/codex-wrapped-christmas",

@@ -69,6 +69,10 @@ await $`mkdir -p ./dist/${targetpackageName}/assets`;
 await $`cp -r ./bin ./dist/${targetpackageName}/`;
 await $`cp scripts/postinstall.mjs dist/${targetpackageName}/postinstall.mjs`;
 await $`cp README.md dist/${targetpackageName}/README.md`;
+await $`cp LICENSE dist/${targetpackageName}/LICENSE`;
+await $`cp THIRD_PARTY_NOTICES.md dist/${targetpackageName}/THIRD_PARTY_NOTICES.md`;
+await $`mkdir -p ./dist/${targetpackageName}/LICENSES`;
+await $`cp LICENSES/IBM-Plex-Mono-OFL.txt dist/${targetpackageName}/LICENSES/IBM-Plex-Mono-OFL.txt`;
 await $`cp -r assets/images dist/${targetpackageName}/assets/`;
 
 await Bun.file(`./dist/${targetpackageName}/package.json`).write(
@@ -107,6 +111,10 @@ for (const [name] of Object.entries(binaries)) {
 
   await $`mkdir -p ${path.join(targetPath, "assets")}`;
   await $`cp -r assets/images ${path.join(targetPath, "assets/")}`;
+  await $`cp LICENSE ${path.join(targetPath, "LICENSE")}`;
+  await $`cp THIRD_PARTY_NOTICES.md ${path.join(targetPath, "THIRD_PARTY_NOTICES.md")}`;
+  await $`mkdir -p ${path.join(targetPath, "LICENSES")}`;
+  await $`cp LICENSES/IBM-Plex-Mono-OFL.txt ${path.join(targetPath, "LICENSES/IBM-Plex-Mono-OFL.txt")}`;
 
   if (dryRun) {
     await $`npm publish --access public --dry-run --tag dry-run`.cwd(targetPath);
