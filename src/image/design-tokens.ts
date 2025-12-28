@@ -15,58 +15,58 @@
  */
 export const colors = {
   // Backgrounds
-  background: "#0B0F1A", // Deep navy
-  surface: "#131A2A", // Elevated surface for cards
-  surfaceHover: "#192238", // Hover state for surfaces
-  surfaceBorder: "#22304D", // Subtle border for depth
+  background: "#0B1A12", // Deep evergreen
+  surface: "#14251B", // Elevated surface for cards
+  surfaceHover: "#1B2F24", // Hover state for surfaces
+  surfaceBorder: "#2B3D33", // Subtle border for depth
 
-  // Text hierarchy (contrast ratios against #0A0A0A)
+  // Text hierarchy (contrast ratios against #0B1A12)
   text: {
-    primary: "#E9EEF8", // Primary content
-    secondary: "#C1CCDE", // Secondary content
-    tertiary: "#8FA1C2", // Labels and captions
-    muted: "#6C7FA1", // Footer/subtle text
-    disabled: "#4C5D79", // Disabled states
+    primary: "#F6F3EE", // Warm white
+    secondary: "#E3DCD2", // Soft white
+    tertiary: "#C8BFB1", // Labels and captions
+    muted: "#A99D8E", // Footer/subtle text
+    disabled: "#7A6F62", // Disabled states
   },
 
   // Accent colors
   accent: {
-    primary: "#3B82F6", // Codex blue
-    primaryHover: "#5A95F8",
-    secondary: "#22D3EE", // Cyan accent
-    tertiary: "#F59E0B", // Amber for highlights
+    primary: "#D24B3A", // Holiday red
+    primaryHover: "#E06352",
+    secondary: "#3EBB74", // Holiday green
+    tertiary: "#D9A441", // Gold highlight
   },
 
   // Semantic colors
   semantic: {
-    success: "#22C55E",
-    warning: "#F59E0B",
-    error: "#EF4444",
-    info: "#3B82F6",
+    success: "#3EBB74",
+    warning: "#D9A441",
+    error: "#D24B3A",
+    info: "#4FA3C2",
   },
 
-  // Heatmap colors - blue progression (7 levels: 0-6)
+  // Heatmap colors - green progression (7 levels: 0-6)
   heatmap: {
-    empty: "#101827", // No activity
-    level1: "#1A2540", // Very low
-    level2: "#23325C", // Low
-    level3: "#2C3E78", // Medium-low
-    level4: "#3553A0", // Medium
-    level5: "#3B6DD4", // Medium-high
-    level6: "#3B82F6", // High
-    level7: "#60A5FA", // Very high
+    empty: "#101C15", // No activity
+    level1: "#173022", // Very low
+    level2: "#1F4630", // Low
+    level3: "#265C3D", // Medium-low
+    level4: "#2E734B", // Medium
+    level5: "#369B62", // Medium-high
+    level6: "#3EBB74", // High
+    level7: "#5FD990", // Very high
   },
 
-  // Streak colors - blue progression (7 levels: 0-6)
+  // Streak colors - red progression (7 levels: 0-6)
   streak: {
-    empty: "#0D1628", // No activity (dark blue tint)
-    level1: "#13213A", // Very low
-    level2: "#1A2D52", // Low
-    level3: "#233B6D", // Medium-low
-    level4: "#2E4E93", // Medium
-    level5: "#3563B8", // Medium-high
-    level6: "#3B74D9", // High
-    level7: "#3B82F6", // Max (accent)
+    empty: "#241412", // No activity (dark red tint)
+    level1: "#3A1916", // Very low
+    level2: "#52201B", // Low
+    level3: "#6D2720", // Medium-low
+    level4: "#8B2F24", // Medium
+    level5: "#B2372B", // Medium-high
+    level6: "#D24B3A", // High
+    level7: "#E06352", // Max (accent)
   },
 } as const;
 
