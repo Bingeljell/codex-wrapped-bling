@@ -7,7 +7,7 @@
 <p>
   <strong>Credit:</strong> Built on top of
   <a href="https://github.com/moddi3/opencode-wrapped">opencode-wrapped</a>
-  by moddi3 (<a href="https://x.com/moddi3io">@moddi3io</a>).
+  by moddi3 (<a href="https://x.com/moddi3io">@moddi3io</a>) and <a href="https://github.com/numman-ali/codex-wrapped">numman-ali/codex-wrapped</a>.
   This has been modified by Bingeljell (<a href="https://x.com/Bingeljell">@Bingeljell</a>).
 </p>
 <p>
@@ -18,7 +18,7 @@
   Found this useful? Follow <a href="https://x.com/nummanali">@nummanali</a> for more AI tooling!
 </p>
 
-Generate a personalized "Spotify Wrapped"-style summary of your [Codex](https://openai.com/codex) usage.
+Generate a personalized "Spotify Wrapped"-style summary of your [Codex](https://openai.com/codex) usage. This is a fork of codex-wrapped by Numman Ali - but with a Christmas Twist and more data points.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bun](https://img.shields.io/badge/Bun-%23000000.svg?logo=bun&logoColor=white)](https://bun.sh)
@@ -99,15 +99,19 @@ The tool generates:
 2. **PNG Image** — A beautiful, shareable wrapped card saved to your home directory
 3. **Clipboard** — Automatically copies the image to your clipboard
 
-## Data Source
+## Data Source & Network (updated from the original Repo by Numman)
 
-Codex Wrapped reads data from your local Codex CLI installation:
+Codex Wrapped reads usage data locally from:
 
 ```
 ~/.codex/ (history.jsonl, sessions, logs)
 ```
 
-No data is sent anywhere. Everything is processed locally.
+It also makes two optional network requests to improve model names and cost estimates:
+- https://models.dev/api.json (model/provider display names)
+- https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json (pricing data)
+
+If these requests fail or are blocked, the tool still works using local data only (with fallback model names and without cost where unavailable).
 
 ## Building
 
