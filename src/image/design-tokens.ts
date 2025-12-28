@@ -164,7 +164,7 @@ export const layout = {
   // Canvas dimensions
   canvas: {
     width: 1500,
-    height: 1900,
+    height: 2100,
   },
 
   // Container padding
@@ -262,9 +262,9 @@ export const components = {
 
   // Time of day heatmap
   timeHeatmap: {
-    cellSize: 12,
-    gap: 3,
-    labelWidth: 36,
+    cellSize: 20,
+    gap: 4,
+    labelWidth: 24,
     labelFontSize: typography.size.xs,
     cellRadius: layout.radius.sm,
   },

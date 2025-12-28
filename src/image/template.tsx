@@ -203,10 +203,21 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const BAR_HEIGHT = 100;
 const BAR_WIDTH = 56;
 const BAR_GAP = 12;
-const TIME_HEATMAP_CELL_SIZE = components.timeHeatmap.cellSize;
+const TIME_HEATMAP_COLUMNS = 24;
+const TIME_HEATMAP_LABEL_GAP = spacing[2];
 const TIME_HEATMAP_GAP = components.timeHeatmap.gap;
 const TIME_HEATMAP_LABEL_WIDTH = components.timeHeatmap.labelWidth;
 const TIME_HEATMAP_LABEL_FONT = components.timeHeatmap.labelFontSize;
+const TIME_HEATMAP_CARD_GAP = spacing[16];
+const TIME_HEATMAP_CARD_PADDING = spacing[6];
+const TIME_HEATMAP_CARD_WIDTH =
+  ((layout.canvas.width - layout.padding.horizontal * 2 - TIME_HEATMAP_CARD_GAP) * 2) / 3;
+const TIME_HEATMAP_INNER_WIDTH = TIME_HEATMAP_CARD_WIDTH - TIME_HEATMAP_CARD_PADDING * 2;
+const TIME_HEATMAP_GRID_WIDTH = TIME_HEATMAP_INNER_WIDTH - TIME_HEATMAP_LABEL_WIDTH - TIME_HEATMAP_LABEL_GAP;
+const TIME_HEATMAP_CELL_SIZE = Math.max(
+  components.timeHeatmap.cellSize,
+  Math.floor((TIME_HEATMAP_GRID_WIDTH - TIME_HEATMAP_GAP * (TIME_HEATMAP_COLUMNS - 1)) / TIME_HEATMAP_COLUMNS)
+);
 const USAGE_BAR_HEIGHT = components.usageBar.height;
 const USAGE_BAR_RADIUS = components.usageBar.radius;
 
@@ -646,10 +657,10 @@ function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
           display: "flex",
           flexDirection: "row",
           gap: TIME_HEATMAP_GAP,
-          paddingLeft: TIME_HEATMAP_LABEL_WIDTH + spacing[2],
+          paddingLeft: TIME_HEATMAP_LABEL_WIDTH + TIME_HEATMAP_LABEL_GAP,
         }}
       >
-        {Array.from({ length: 24 }, (_, hour) => (
+        {Array.from({ length: TIME_HEATMAP_COLUMNS }, (_, hour) => (
           <div
             key={hour}
             style={{
@@ -707,7 +718,7 @@ function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
 }
 
 function TopProjectsCard({ projects }: { projects: ProjectStats[] }) {
-  const topProjects = projects.slice(0, 3);
+  const topProjects = projects.slice(0, 5);
 
   return (
     <div
@@ -799,8 +810,7 @@ function formatProjectName(path: string): string {
   const normalized = path.replace(/\\/g, "/");
   const parts = normalized.split("/").filter(Boolean);
   if (parts.length === 0) return "Unknown";
-  if (parts.length <= 2) return parts.join("/");
-  return `.../${parts.slice(-2).join("/")}`;
+  return parts[parts.length - 1];
 }
 
 function StatsGrid({ stats }: { stats: CodexStats }) {
