@@ -15,58 +15,58 @@
  */
 export const colors = {
   // Backgrounds
-  background: "#0B1A12", // Deep evergreen
-  surface: "#14251B", // Elevated surface for cards
-  surfaceHover: "#1B2F24", // Hover state for surfaces
-  surfaceBorder: "#2B3D33", // Subtle border for depth
+  background: "#02120B", // Electric Night (Darker for contrast)
+  surface: "#0A2218", // Deep Cyber Pine
+  surfaceHover: "#113022",
+  surfaceBorder: "#1A4533", // Brighter border
 
-  // Text hierarchy (contrast ratios against #0B1A12)
+  // Text hierarchy
   text: {
-    primary: "#F6F3EE", // Warm white
-    secondary: "#E3DCD2", // Soft white
-    tertiary: "#C8BFB1", // Labels and captions
-    muted: "#A99D8E", // Footer/subtle text
-    disabled: "#7A6F62", // Disabled states
+    primary: "#FFFFFF", // Pure White
+    secondary: "#E0F2F1", // Icy Mist
+    tertiary: "#B2DFDB", // Frozen Glass
+    muted: "#80CBC4", // Digital Frost
+    disabled: "#4F6A65",
   },
 
   // Accent colors
   accent: {
-    primary: "#D24B3A", // Holiday red
-    primaryHover: "#E06352",
-    secondary: "#3EBB74", // Holiday green
-    tertiary: "#D9A441", // Gold highlight
+    primary: "#FF1A40", // Electric Holly (Neon Red)
+    primaryHover: "#FF4D6A",
+    secondary: "#00E676", // Cyber Spruce (Neon Green)
+    tertiary: "#FFD700", // Laser Gold
   },
 
   // Semantic colors
   semantic: {
-    success: "#3EBB74",
-    warning: "#D9A441",
-    error: "#D24B3A",
-    info: "#4FA3C2",
+    success: "#00E676",
+    warning: "#FFD700",
+    error: "#FF1A40",
+    info: "#00B0FF", // Electric Blue
   },
 
-  // Heatmap colors - green progression (7 levels: 0-6)
+  // Heatmap colors - Neon Green progression (7 levels: 0-6)
   heatmap: {
-    empty: "#101C15", // No activity
-    level1: "#173022", // Very low
-    level2: "#1F4630", // Low
-    level3: "#265C3D", // Medium-low
-    level4: "#2E734B", // Medium
-    level5: "#369B62", // Medium-high
-    level6: "#3EBB74", // High
-    level7: "#5FD990", // Very high
+    empty: "#0D261C", // Visible Grid Base
+    level1: "#103E2C",
+    level2: "#14593E",
+    level3: "#187550",
+    level4: "#1C9665",
+    level5: "#20B87A",
+    level6: "#00E676", // Neon Green
+    level7: "#00FF9D", // Super Bright Green
   },
 
-  // Streak colors - red progression (7 levels: 0-6)
+  // Streak colors - Electric Gold progression (7 levels: 0-6)
   streak: {
-    empty: "#241412", // No activity (dark red tint)
-    level1: "#3A1916", // Very low
-    level2: "#52201B", // Low
-    level3: "#6D2720", // Medium-low
-    level4: "#8B2F24", // Medium
-    level5: "#B2372B", // Medium-high
-    level6: "#D24B3A", // High
-    level7: "#E06352", // Max (accent)
+    empty: "#1A1600", // Darkest Gold
+    level1: "#332B00",
+    level2: "#665600",
+    level3: "#998100",
+    level4: "#CCAC00",
+    level5: "#E6C200",
+    level6: "#FFD700", // Electric Gold
+    level7: "#FFEA00", // Blinding Gold
   },
 } as const;
 

@@ -205,6 +205,44 @@ function HeatmapLegend() {
       >
         More
       </span>
+
+      <div
+        style={{
+          width: 1,
+          height: 12,
+          backgroundColor: colors.surfaceBorder,
+          marginLeft: spacing[3],
+          marginRight: spacing[3],
+        }}
+      />
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: LEGEND_GAP,
+        }}
+      >
+        <div
+          style={{
+            width: LEGEND_CELL_SIZE,
+            height: LEGEND_CELL_SIZE,
+            backgroundColor: STREAK_COLORS[6],
+            borderRadius: 3,
+          }}
+        />
+        <span
+          style={{
+            fontSize: components.legend.fontSize,
+            fontWeight: typography.weight.medium,
+            color: components.legend.color,
+            fontFamily: typography.fontFamily.mono,
+          }}
+        >
+          Longest Streak
+        </span>
+      </div>
     </div>
   );
 }
