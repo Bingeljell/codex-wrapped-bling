@@ -91,7 +91,7 @@ function generateDemoStats(): CodexStats {
     ],
 
     projectUsage: [
-      { name: "codex-wrapped", tokens: 12500000, percentage: 21.5 },
+      { name: "codex-wrapped-christmas", tokens: 12500000, percentage: 21.5 },
       { name: "personal-website", tokens: 8400000, percentage: 14.4 },
       { name: "ios-app-v2", tokens: 5600000, percentage: 9.6 },
       { name: "data-pipeline", tokens: 4200000, percentage: 7.2 },

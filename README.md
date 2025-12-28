@@ -1,6 +1,6 @@
 <div align="center">
 
-# codex-wrapped-bling
+# codex-wrapped-christmas
 
 **Your year in code, beautifully visualized.**
 
@@ -9,6 +9,10 @@
   <a href="https://github.com/moddi3/opencode-wrapped">opencode-wrapped</a>
   by moddi3 (<a href="https://x.com/moddi3io">@moddi3io</a>).
   This has been modified by Bingeljell (<a href="https://x.com/Bingeljell">@Bingeljell</a>).
+</p>
+<p>
+  <strong>Fork updates:</strong> This fork is maintained by Bingeljell and includes the
+  features listed in <a href="./CHANGELOG.md">CHANGELOG.md</a>.
 </p>
 <p>
   Found this useful? Follow <a href="https://x.com/nummanali">@nummanali</a> for more AI tooling!
@@ -32,19 +36,19 @@ Generate a personalized "Spotify Wrapped"-style summary of your [Codex](https://
 Run directly without installing:
 
 ```bash
-npx codex-wrapped # or bunx, or yarn/pnpm dlx
+npx codex-wrapped-christmas # or bunx, or yarn/pnpm dlx
 ```
 
 ### Global Install
 
 ```bash
-npm install -g codex-wrapped # or bun/yarn/pnpm
+npm install -g codex-wrapped-christmas # or bun/yarn/pnpm
 ```
 
 Then run anywhere:
 
 ```bash
-codex-wrapped
+codex-wrapped-christmas
 ```
 
 ## Usage Options
@@ -64,6 +68,15 @@ codex-wrapped
 - Shareable PNG image
 - Inline image display (Ghostty, Kitty, iTerm2, WezTerm, Konsole)
 - Auto-copy to clipboard
+
+## What's New in This Fork
+
+- Model usage bars with an "Other" bucket
+- Time-of-day heatmap (7x24, local time)
+- Top projects list ranked by token usage
+- Model switching stats (total switches, dominant share)
+- Data pipeline upgrades for project/hourly/model totals
+- Layout, palette, and rendering fixes (see `CHANGELOG.md`)
 
 ## Terminal Support
 

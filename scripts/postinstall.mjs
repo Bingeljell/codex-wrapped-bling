@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Postinstall script for codex-wrapped
+ * Postinstall script for codex-wrapped-christmas
  *
  * This script runs after npm install and symlinks the correct platform-specific
  * binary to the bin directory. It auto-detects:
@@ -109,7 +109,7 @@ function getPackageName() {
   }
 
   // Build package name parts
-  const parts = ["codex-wrapped", platform, arch];
+  const parts = ["codex-wrapped-christmas", platform, arch];
 
   // Add baseline suffix for x64 without AVX2
   if (arch === "x64" && !detectAVX2()) {
@@ -128,7 +128,7 @@ function getPackageName() {
  * Find the binary from the platform package
  */
 function findBinary(packageName) {
-  const binaryName = os.platform() === "win32" ? "codex-wrapped.exe" : "codex-wrapped";
+  const binaryName = os.platform() === "win32" ? "codex-wrapped-christmas.exe" : "codex-wrapped-christmas";
 
   try {
     const packageJsonPath = require.resolve(`${packageName}/package.json`);
@@ -201,23 +201,30 @@ async function main() {
     const packageName = getPackageName();
 
     if (!packageName) {
-      console.error(`codex-wrapped: Unsupported platform: ${os.platform()}-${os.arch()}`);
+      console.error(`codex-wrapped-christmas: Unsupported platform: ${os.platform()}-${os.arch()}`);
       console.error("Please download the binary manually from:");
-      console.error("https://github.com/numman-ali/codex-wrapped/releases");
+      console.error("https://github.com/bingeljell/codex-wrapped-christmas/releases");
       process.exit(0); // Exit gracefully
     }
 
-    console.log(`codex-wrapped: Detected platform package: ${packageName}`);
+    console.log(`codex-wrapped-christmas: Detected platform package: ${packageName}`);
 
     const result = findBinary(packageName);
 
     if (!result) {
       // Try fallback without baseline/musl
-      const baseParts = packageName.split("-").slice(0, 3);
+      const baseParts = packageName.split("-");
+      while (
+        baseParts.length > 0 &&
+        (baseParts[baseParts.length - 1] === "baseline" ||
+          baseParts[baseParts.length - 1] === "musl")
+      ) {
+        baseParts.pop();
+      }
       const basePackage = baseParts.join("-");
 
       if (basePackage !== packageName) {
-        console.log(`codex-wrapped: Trying fallback package: ${basePackage}`);
+        console.log(`codex-wrapped-christmas: Trying fallback package: ${basePackage}`);
         const fallbackResult = findBinary(basePackage);
 
         if (fallbackResult) {
@@ -226,16 +233,16 @@ async function main() {
         }
       }
 
-      console.error(`codex-wrapped: Could not find binary for ${packageName}`);
+      console.error(`codex-wrapped-christmas: Could not find binary for ${packageName}`);
       console.error("The optional dependency may have failed to install.");
       console.error("Please download the binary manually from:");
-      console.error("https://github.com/numman-ali/codex-wrapped/releases");
+      console.error("https://github.com/bingeljell/codex-wrapped-christmas/releases");
       process.exit(0);
     }
 
     linkBinary(result.binaryPath, result.binaryName);
   } catch (error) {
-    console.error("codex-wrapped: Postinstall error:", error.message);
+    console.error("codex-wrapped-christmas: Postinstall error:", error.message);
     process.exit(0); // Exit gracefully to not break npm install
   }
 }

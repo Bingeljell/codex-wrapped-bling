@@ -1,29 +1,29 @@
 {
-  "name": "codex-wrapped",
+  "name": "codex-wrapped-christmas",
   "version": "1.0.0",
   "author": {
-    "name": "Numman Ali",
-    "email": "numman.ali@gmail.com"
+    "name": "Nikhil Shahane",
+    "email": "nikhil.shahane@gmail.com"
   },
   "description": "Generate a personalized Spotify Wrapped-style summary of your Codex usage",
-  "homepage": "https://github.com/numman-ali/codex-wrapped",
+  "homepage": "https://github.com/bingeljell/codex-wrapped-christmas",
   "repository": {
     "type": "git",
-    "url": "https://github.com/numman-ali/codex-wrapped.git"
+    "url": "https://github.com/bingeljell/codex-wrapped-christmas.git"
   },
   "bugs": {
-    "url": "https://github.com/numman-ali/codex-wrapped/issues"
+    "url": "https://github.com/bingeljell/codex-wrapped-christmas/issues"
   },
   "keywords": [
     "codex",
     "openai",
     "wrapped",
-    "codex-wrapped"
+    "codex-wrapped-christmas"
   ],
   "license": "MIT",
   "type": "module",
   "bin": {
-    "codex-wrapped": "./bin/codex-wrapped"
+    "codex-wrapped-christmas": "./bin/codex-wrapped-christmas"
   },
   "scripts": {
     "start": "bun src/index.ts",
