@@ -7,6 +7,10 @@ import logoBase64 from "../../assets/images/codex-logo.base64.txt" with { type: 
 
 const CODEX_LOGO_DATA_URL = `data:image/png;base64,${logoBase64.trim()}`;
 
+const GRID_GAP = spacing[5];
+const COL_WIDTH = (layout.content.width - GRID_GAP * 2) / 3;
+const TWO_COL_WIDTH = COL_WIDTH * 2 + GRID_GAP;
+
 export function WrappedTemplate({ stats }: { stats: CodexStats }) {
   return (
     <div
@@ -100,11 +104,11 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
           marginTop: spacing[8],
           display: "flex",
           flexDirection: "row",
-          gap: spacing[16],
+          gap: GRID_GAP,
         }}
       >
-        <ModelUsageCard models={stats.modelUsage} />
-        <UsageDetailCard stats={stats} />
+        <ModelUsageCard models={stats.modelUsage} width={TWO_COL_WIDTH} />
+        <UsageDetailCard stats={stats} width={COL_WIDTH} />
       </div>
 
       <div
@@ -112,11 +116,11 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
           marginTop: spacing[8],
           display: "flex",
           flexDirection: "row",
-          gap: spacing[16],
+          gap: GRID_GAP,
         }}
       >
-        <TimeOfDayCard timeOfDayActivity={stats.timeOfDayActivity} />
-        <TopProjectsCard projects={stats.projectUsage} />
+        <TimeOfDayCard timeOfDayActivity={stats.timeOfDayActivity} width={TWO_COL_WIDTH} />
+        <TopProjectsCard projects={stats.projectUsage} width={COL_WIDTH} />
       </div>
 
       <StatsGrid stats={stats} />
@@ -363,7 +367,7 @@ function Section({ title, marginTop = 0, children }: { title: string; marginTop?
   );
 }
 
-function ModelUsageCard({ models }: { models: ModelStats[] }) {
+function ModelUsageCard({ models, width }: { models: ModelStats[]; width: number }) {
   const maxCount = models.reduce((max, model) => Math.max(max, model.count), 0);
 
   return (
@@ -372,7 +376,8 @@ function ModelUsageCard({ models }: { models: ModelStats[] }) {
         display: "flex",
         flexDirection: "column",
         gap: spacing[5],
-        flex: 2,
+        width,
+        flex: "none",
         backgroundColor: colors.surface,
         border: `1px solid ${colors.surfaceBorder}`,
         borderRadius: layout.radius.lg,
@@ -468,7 +473,7 @@ function ModelUsageChart({ models, maxCount }: { models: ModelStats[]; maxCount:
   );
 }
 
-function UsageDetailCard({ stats }: { stats: CodexStats }) {
+function UsageDetailCard({ stats, width }: { stats: CodexStats; width: number }) {
   const insights = [
     stats.totalInputTokens > 0 && {
       label: "Input",
@@ -507,7 +512,8 @@ function UsageDetailCard({ stats }: { stats: CodexStats }) {
         display: "flex",
         flexDirection: "column",
         gap: spacing[5],
-        flex: 1,
+        width,
+        flex: "none",
         backgroundColor: colors.surface,
         border: `1px solid ${colors.surfaceBorder}`,
         borderRadius: layout.radius.lg,
@@ -608,14 +614,15 @@ function UsageDetailCard({ stats }: { stats: CodexStats }) {
 const TIME_DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const TIME_HOUR_LABELS = new Set([0, 6, 12, 18]);
 
-function TimeOfDayCard({ timeOfDayActivity }: { timeOfDayActivity: TimeOfDayActivity }) {
+function TimeOfDayCard({ timeOfDayActivity, width }: { timeOfDayActivity: TimeOfDayActivity; width: number }) {
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         gap: spacing[5],
-        flex: 2,
+        width,
+        flex: "none",
         backgroundColor: colors.surface,
         border: `1px solid ${colors.surfaceBorder}`,
         borderRadius: layout.radius.lg,
@@ -633,7 +640,7 @@ function TimeOfDayCard({ timeOfDayActivity }: { timeOfDayActivity: TimeOfDayActi
       >
         Time of Day
       </span>
-      <TimeOfDayHeatmap activity={timeOfDayActivity} />
+      <TimeOfDayHeatmap activity={timeOfDayActivity} cardWidth={width} />
       <span
         style={{
           fontSize: typography.size.xs,
@@ -647,8 +654,12 @@ function TimeOfDayCard({ timeOfDayActivity }: { timeOfDayActivity: TimeOfDayActi
   );
 }
 
-function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
+function TimeOfDayHeatmap({ activity, cardWidth }: { activity: TimeOfDayActivity; cardWidth: number }) {
   const { counts, maxCount } = activity;
+  
+  const innerWidth = cardWidth - TIME_HEATMAP_CARD_PADDING * 2;
+  const gridWidth = innerWidth - TIME_HEATMAP_LABEL_WIDTH - TIME_HEATMAP_LABEL_GAP;
+  const cellSize = Math.floor((gridWidth - TIME_HEATMAP_GAP * (TIME_HEATMAP_COLUMNS - 1)) / TIME_HEATMAP_COLUMNS);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: spacing[2] }}>
@@ -665,7 +676,7 @@ function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
             key={hour}
             style={{
               display: "flex",
-              width: TIME_HEATMAP_CELL_SIZE,
+              width: cellSize,
               alignItems: "center",
               justifyContent: "center",
               textAlign: "center",
@@ -701,8 +712,8 @@ function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
                     key={`${dayIndex}-${hourIndex}`}
                     style={{
                       display: "flex",
-                      width: TIME_HEATMAP_CELL_SIZE,
-                      height: TIME_HEATMAP_CELL_SIZE,
+                      width: cellSize,
+                      height: cellSize,
                       backgroundColor: HEATMAP_COLORS[intensity],
                       borderRadius: components.timeHeatmap.cellRadius,
                     }}
@@ -717,7 +728,7 @@ function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
   );
 }
 
-function TopProjectsCard({ projects }: { projects: ProjectStats[] }) {
+function TopProjectsCard({ projects, width }: { projects: ProjectStats[]; width: number }) {
   const topProjects = projects.slice(0, 5);
 
   return (
@@ -726,7 +737,8 @@ function TopProjectsCard({ projects }: { projects: ProjectStats[] }) {
         display: "flex",
         flexDirection: "column",
         gap: spacing[5],
-        flex: 1,
+        width,
+        flex: "none",
         backgroundColor: colors.surface,
         border: `1px solid ${colors.surfaceBorder}`,
         borderRadius: layout.radius.lg,

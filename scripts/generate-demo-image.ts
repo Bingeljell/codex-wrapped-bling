@@ -77,12 +77,34 @@ function generateDemoStats(): CodexStats {
       { id: "gpt-4.1", name: "GPT-4.1", providerId: "openai", count: 2134, percentage: 23.9 },
       { id: "gpt-4o", name: "GPT-4o", providerId: "openai", count: 1289, percentage: 14.4 },
     ],
+    
+    modelUsage: [
+      { id: "gpt-5.2-codex", name: "GPT-5.2 Codex", providerId: "openai", count: 4521, percentage: 50.6 },
+      { id: "gpt-4.1", name: "GPT-4.1", providerId: "openai", count: 2134, percentage: 23.9 },
+      { id: "gpt-4o", name: "GPT-4o", providerId: "openai", count: 1289, percentage: 14.4 },
+    ],
 
     topProviders: [
       { id: "openai", name: "OpenAI", count: 7810, percentage: 85.0 },
       { id: "anthropic", name: "Anthropic", count: 990, percentage: 11.1 },
       { id: "google", name: "Google", count: 390, percentage: 3.9 },
     ],
+
+    projectUsage: [
+      { name: "codex-wrapped", tokens: 12500000, percentage: 21.5 },
+      { name: "personal-website", tokens: 8400000, percentage: 14.4 },
+      { name: "ios-app-v2", tokens: 5600000, percentage: 9.6 },
+      { name: "data-pipeline", tokens: 4200000, percentage: 7.2 },
+      { name: "api-gateway", tokens: 3100000, percentage: 5.3 },
+    ],
+
+    timeOfDayActivity: {
+      counts: Array(7).fill(0).map(() => Array(24).fill(0).map(() => Math.floor(Math.random() * 50))),
+      maxCount: 50,
+    },
+
+    modelSwitches: 142,
+    dominantModelShare: 50.6,
 
     maxStreak: 21,
     currentStreak: 8,

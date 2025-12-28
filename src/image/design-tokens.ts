@@ -176,7 +176,7 @@ export const layout = {
 
   // Content area (canvas minus padding)
   content: {
-    width: 1322, // 1450 - (64 * 2)
+    width: 1372, // 1500 - (64 * 2)
   },
 
   // Border radius scale
