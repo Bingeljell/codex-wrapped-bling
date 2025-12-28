@@ -70,6 +70,12 @@ export interface ProviderStats {
   percentage: number;
 }
 
+export interface ProjectStats {
+  name: string;
+  tokens: number;
+  percentage: number;
+}
+
 export interface CodexStats {
   year: number;
 
@@ -95,9 +101,20 @@ export interface CodexStats {
 
   // Models (sorted by usage)
   topModels: ModelStats[];
+  modelUsage: ModelStats[];
 
   // Providers (sorted by usage)
   topProviders: ProviderStats[];
+
+  // Projects (sorted by tokens)
+  projectUsage: ProjectStats[];
+
+  // Time of day activity (tokens by weekday/hour)
+  timeOfDayActivity: TimeOfDayActivity;
+
+  // Model switching
+  modelSwitches: number;
+  dominantModelShare: number;
 
   // Streak
   maxStreak: number;
@@ -122,6 +139,11 @@ export interface WeekdayActivity {
   counts: [number, number, number, number, number, number, number];
   mostActiveDay: number;
   mostActiveDayName: string;
+  maxCount: number;
+}
+
+export interface TimeOfDayActivity {
+  counts: number[][];
   maxCount: number;
 }
 

@@ -1,4 +1,4 @@
-import type { CodexStats, ModelStats, ProviderStats, WeekdayActivity } from "./types";
+import type { CodexStats, ModelStats, ProviderStats, ProjectStats, TimeOfDayActivity, WeekdayActivity } from "./types";
 import { collectCodexUsageData, getCodexFirstPromptTimestamp, type CodexUsageEvent } from "./collector";
 import { fetchModelsData, getModelDisplayName, getModelProvider, getProviderDisplayName } from "./models";
 import { calculateCostUSD, getModelPricing } from "./pricing";
@@ -72,13 +72,11 @@ export async function calculateStats(year: number): Promise<CodexStats> {
   const totalModelTokens = modelStats.reduce((sum, model) => sum + model.count, 0);
   const percentageDenominator = totalTokens > 0 ? totalTokens : totalModelTokens;
 
-  const topModels = modelStats
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 3)
-    .map((model) => ({
-      ...model,
-      percentage: percentageDenominator > 0 ? (model.count / percentageDenominator) * 100 : 0,
-    }));
+  const sortedModels = [...modelStats].sort((a, b) => b.count - a.count);
+  const topModels = sortedModels.slice(0, 3).map((model) => ({
+    ...model,
+    percentage: percentageDenominator > 0 ? (model.count / percentageDenominator) * 100 : 0,
+  }));
 
   const topProviders: ProviderStats[] = Array.from(providerCounts.entries())
     .sort((a, b) => b[1] - a[1])
@@ -89,6 +87,14 @@ export async function calculateStats(year: number): Promise<CodexStats> {
       count,
       percentage: percentageDenominator > 0 ? (count / percentageDenominator) * 100 : 0,
     }));
+
+  const modelUsage = buildModelUsage(sortedModels, percentageDenominator, 5);
+  const projectUsage = buildProjectUsageStats(usageData.projectUsage, percentageDenominator);
+  const timeOfDayActivity = buildTimeOfDayActivity(usageData.hourlyActivity);
+  const modelSwitches = countModelSwitches(usageData.events);
+  const dominantModelShare = percentageDenominator > 0
+    ? ((sortedModels[0]?.count ?? 0) / percentageDenominator) * 100
+    : 0;
 
   const { maxStreak, currentStreak, maxStreakDays } = calculateStreaks(dailyActivity, year);
   const mostActiveDay = findMostActiveDay(dailyActivity);
@@ -118,7 +124,12 @@ export async function calculateStats(year: number): Promise<CodexStats> {
     totalCost,
     hasUsageCost: totalCost > 0,
     topModels,
+    modelUsage,
     topProviders,
+    projectUsage,
+    timeOfDayActivity,
+    modelSwitches,
+    dominantModelShare,
     maxStreak,
     currentStreak,
     maxStreakDays,
@@ -135,6 +146,29 @@ function resolveProviderId(modelId: string): string {
   if (modelId.startsWith("gpt") || modelId.startsWith("openai")) return "openai";
 
   return "openai";
+}
+
+function buildModelUsage(models: ModelStats[], totalTokens: number, limit: number): ModelStats[] {
+  const top = models.slice(0, limit);
+  const remaining = models.slice(limit);
+  const otherCount = remaining.reduce((sum, model) => sum + model.count, 0);
+
+  const usage = top.map((model) => ({
+    ...model,
+    percentage: totalTokens > 0 ? (model.count / totalTokens) * 100 : 0,
+  }));
+
+  if (otherCount > 0) {
+    usage.push({
+      id: "other",
+      name: "Other",
+      providerId: "other",
+      count: otherCount,
+      percentage: totalTokens > 0 ? (otherCount / totalTokens) * 100 : 0,
+    });
+  }
+
+  return usage;
 }
 
 function formatDateKey(date: Date): string {
@@ -194,6 +228,52 @@ async function calculateUsageCost(modelUsageTotals: Map<string, ModelUsageTotals
   }
 
   return totalCost;
+}
+
+function buildProjectUsageStats(
+  projectUsage: Map<string, { tokens: number }>,
+  totalTokens: number
+): ProjectStats[] {
+  const stats: ProjectStats[] = [];
+
+  for (const [name, usage] of projectUsage.entries()) {
+    if (usage.tokens <= 0) continue;
+    stats.push({
+      name,
+      tokens: usage.tokens,
+      percentage: totalTokens > 0 ? (usage.tokens / totalTokens) * 100 : 0,
+    });
+  }
+
+  return stats.sort((a, b) => b.tokens - a.tokens);
+}
+
+function buildTimeOfDayActivity(counts: number[][]): TimeOfDayActivity {
+  let maxCount = 0;
+  const normalized = counts.map((row) =>
+    row.map((value) => {
+      if (value > maxCount) {
+        maxCount = value;
+      }
+      return value;
+    })
+  );
+
+  return { counts: normalized, maxCount };
+}
+
+function countModelSwitches(events: CodexUsageEvent[]): number {
+  let switches = 0;
+  let lastModel: string | null = null;
+
+  for (const event of events) {
+    if (lastModel && event.model !== lastModel) {
+      switches += 1;
+    }
+    lastModel = event.model;
+  }
+
+  return switches;
 }
 
 function calculateStreaks(

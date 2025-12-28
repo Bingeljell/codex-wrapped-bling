@@ -18,6 +18,13 @@ export interface CodexUsageEvent {
   outputTokens: number;
   reasoningOutputTokens: number;
   totalTokens: number;
+  project?: string;
+}
+
+export interface ProjectUsage {
+  tokens: number;
+  messages: number;
+  sessions: number;
 }
 
 export interface CodexUsageData {
@@ -27,6 +34,8 @@ export interface CodexUsageData {
   totalSessions: number;
   projects: Set<string>;
   earliestSessionDate: Date | null;
+  projectUsage: Map<string, ProjectUsage>;
+  hourlyActivity: number[][];
 }
 
 export async function checkCodexDataExists(): Promise<boolean> {
@@ -105,6 +114,8 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
   const events: CodexUsageEvent[] = [];
   const dailyActivity = new Map<string, number>();
   const projects = new Set<string>();
+  const projectUsage = new Map<string, ProjectUsage>();
+  const hourlyActivity = Array.from({ length: 7 }, () => Array(24).fill(0));
   let totalMessages = 0;
   let earliestSessionDate: Date | null = null;
 
@@ -113,6 +124,8 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
     let currentModel: string | undefined;
     let currentModelIsFallback = false;
     let legacyFallbackUsed = false;
+    let currentProject: string | null = null;
+    let sessionProject: string | null = null;
 
     const rl = createInterface({
       input: createReadStream(filePath),
@@ -142,6 +155,10 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
         const cwd = entry?.payload?.cwd;
         if (cwd) {
           projects.add(cwd);
+          currentProject = cwd;
+          if (!sessionProject) {
+            sessionProject = cwd;
+          }
         }
         continue;
       }
@@ -164,6 +181,9 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
             const dateKey = formatDateKey(new Date(timestamp));
             dailyActivity.set(dateKey, (dailyActivity.get(dateKey) || 0) + 1);
           }
+          const projectKey = currentProject ?? "Unknown";
+          const usage = getOrCreateProjectUsage(projectUsage, projectKey);
+          usage.messages += 1;
           continue;
         }
 
@@ -225,13 +245,29 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
           outputTokens: delta.outputTokens,
           reasoningOutputTokens: delta.reasoningOutputTokens,
           totalTokens: delta.totalTokens,
+          project: currentProject ?? "Unknown",
         });
 
         if (isFallback) {
           // No-op for now; kept for parity with ccusage
         }
+
+        const projectKey = currentProject ?? "Unknown";
+        const usage = getOrCreateProjectUsage(projectUsage, projectKey);
+        usage.tokens += delta.totalTokens;
+
+        const date = new Date(timestamp);
+        const dayIndex = date.getDay();
+        const hourIndex = date.getHours();
+        if (hourlyActivity[dayIndex]?.[hourIndex] !== undefined) {
+          hourlyActivity[dayIndex][hourIndex] += delta.totalTokens;
+        }
       }
     }
+
+    const sessionKey = sessionProject ?? "Unknown";
+    const usage = getOrCreateProjectUsage(projectUsage, sessionKey);
+    usage.sessions += 1;
 
     if (legacyFallbackUsed) {
       // ignore - best-effort
@@ -247,6 +283,8 @@ export async function collectCodexUsageData(year: number): Promise<CodexUsageDat
     totalSessions: files.length,
     projects,
     earliestSessionDate,
+    projectUsage,
+    hourlyActivity,
   };
 }
 
@@ -344,4 +382,12 @@ function formatDateKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function getOrCreateProjectUsage(map: Map<string, ProjectUsage>, key: string): ProjectUsage {
+  const existing = map.get(key);
+  if (existing) return existing;
+  const fresh = { tokens: 0, messages: 0, sessions: 0 };
+  map.set(key, fresh);
+  return fresh;
 }

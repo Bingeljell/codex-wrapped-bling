@@ -1,7 +1,8 @@
-import type { CodexStats, WeekdayActivity } from "../types";
-import { formatNumberFull, formatCostFull, formatDate } from "../utils/format";
+import type { CodexStats, ModelStats, ProjectStats, TimeOfDayActivity, WeekdayActivity } from "../types";
+import { formatNumber, formatNumberFull, formatCostFull, formatDate } from "../utils/format";
+import { getIntensityLevel } from "../utils/dates";
 import { ActivityHeatmap } from "./heatmap";
-import { colors, typography, spacing, layout, components } from "./design-tokens";
+import { colors, typography, spacing, layout, components, HEATMAP_COLORS } from "./design-tokens";
 import logoBase64 from "../../assets/images/codex-logo.base64.txt" with { type: "text" };
 
 const CODEX_LOGO_DATA_URL = `data:image/png;base64,${logoBase64.trim()}`;
@@ -27,6 +28,7 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
     >
       <div
         style={{
+          display: "flex",
           position: "absolute",
           top: -220,
           right: -160,
@@ -39,6 +41,7 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
       />
       <div
         style={{
+          display: "flex",
           position: "absolute",
           bottom: -240,
           left: -160,
@@ -100,13 +103,20 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
           gap: spacing[16],
         }}
       >
-        <RankingList
-          title="Top Models"
-          items={stats.topModels.map((m) => ({
-            name: m.name,
-          }))}
-        />
-        <InsightCard stats={stats} />
+        <ModelUsageCard models={stats.modelUsage} />
+        <UsageDetailCard stats={stats} />
+      </div>
+
+      <div
+        style={{
+          marginTop: spacing[8],
+          display: "flex",
+          flexDirection: "row",
+          gap: spacing[16],
+        }}
+      >
+        <TimeOfDayCard timeOfDayActivity={stats.timeOfDayActivity} />
+        <TopProjectsCard projects={stats.projectUsage} />
       </div>
 
       <StatsGrid stats={stats} />
@@ -193,6 +203,12 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const BAR_HEIGHT = 100;
 const BAR_WIDTH = 56;
 const BAR_GAP = 12;
+const TIME_HEATMAP_CELL_SIZE = components.timeHeatmap.cellSize;
+const TIME_HEATMAP_GAP = components.timeHeatmap.gap;
+const TIME_HEATMAP_LABEL_WIDTH = components.timeHeatmap.labelWidth;
+const TIME_HEATMAP_LABEL_FONT = components.timeHeatmap.labelFontSize;
+const USAGE_BAR_HEIGHT = components.usageBar.height;
+const USAGE_BAR_RADIUS = components.usageBar.radius;
 
 const HERO_STAT_CONTENT_HEIGHT = BAR_HEIGHT + spacing[2] + 50;
 
@@ -269,6 +285,7 @@ function WeeklyBarChart({ weekdayActivity }: { weekdayActivity: WeekdayActivity 
             <div
               key={i}
               style={{
+                display: "flex",
                 width: BAR_WIDTH,
                 height: barHeight,
                 backgroundColor: isHighlighted ? colors.accent.primary : colors.streak.level4,
@@ -335,19 +352,16 @@ function Section({ title, marginTop = 0, children }: { title: string; marginTop?
   );
 }
 
-interface RankingItem {
-  name: string;
-  logoUrl?: string;
-}
+function ModelUsageCard({ models }: { models: ModelStats[] }) {
+  const maxCount = models.reduce((max, model) => Math.max(max, model.count), 0);
 
-function RankingList({ title, items }: { title: string; items: RankingItem[] }) {
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         gap: spacing[5],
-        flex: 1,
+        flex: 2,
         backgroundColor: colors.surface,
         border: `1px solid ${colors.surfaceBorder}`,
         borderRadius: layout.radius.lg,
@@ -363,76 +377,87 @@ function RankingList({ title, items }: { title: string; items: RankingItem[] }) 
           textTransform: components.sectionHeader.textTransform,
         }}
       >
-        {title}
+        Model Usage
       </span>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: spacing[4],
-        }}
-      >
-        {items.map((item, i) => (
-          <RankingItemRow key={i} rank={i + 1} name={item.name} logoUrl={item.logoUrl} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface RankingItemRowProps {
-  rank: number;
-  name: string;
-  logoUrl?: string;
-}
-
-function RankingItemRow({ rank, name, logoUrl }: RankingItemRowProps) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: spacing[4],
-      }}
-    >
-      <span
-        style={{
-          fontSize: components.ranking.numberSize,
-          fontWeight: typography.weight.bold,
-          color: colors.text.tertiary,
-          width: components.ranking.numberWidth,
-          textAlign: "right",
-        }}
-      >
-        {rank}
-      </span>
-
-      {logoUrl && (
-        <img
-          src={logoUrl}
-          width={components.ranking.logoSize}
-          height={components.ranking.logoSize}
+      {models.length === 0 ? (
+        <span
           style={{
-            borderRadius: components.ranking.logoBorderRadius,
-            background: "#ffffff",
+            fontSize: typography.size.md,
+            fontWeight: typography.weight.medium,
+            color: colors.text.muted,
           }}
-        />
+        >
+          No model data
+        </span>
+      ) : (
+        <ModelUsageChart models={models} maxCount={maxCount} />
       )}
-
-      <span
-        style={{
-          fontSize: components.ranking.itemSize,
-          fontWeight: typography.weight.medium,
-          color: colors.text.primary,
-        }}
-      >
-        {name}
-      </span>
     </div>
   );
 }
 
-function InsightCard({ stats }: { stats: CodexStats }) {
+function ModelUsageChart({ models, maxCount }: { models: ModelStats[]; maxCount: number }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: spacing[4] }}>
+      {models.map((model) => {
+        const width = maxCount > 0 ? Math.round((model.count / maxCount) * 100) : 0;
+        const barColor = model.id === "other" ? colors.accent.secondary : colors.accent.primary;
+        return (
+          <div key={model.id} style={{ display: "flex", flexDirection: "column", gap: spacing[2] }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                gap: spacing[4],
+              }}
+            >
+              <span
+                style={{
+                  fontSize: typography.size.base,
+                  fontWeight: typography.weight.medium,
+                  color: colors.text.primary,
+                }}
+              >
+                {model.name}
+              </span>
+              <span
+                style={{
+                  fontSize: typography.size.sm,
+                  fontWeight: typography.weight.medium,
+                  color: colors.text.muted,
+                }}
+              >
+                {formatNumber(model.count)} tok
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                height: USAGE_BAR_HEIGHT,
+                backgroundColor: colors.surfaceHover,
+                borderRadius: USAGE_BAR_RADIUS,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  height: "100%",
+                  width: `${width}%`,
+                  backgroundColor: barColor,
+                  borderRadius: USAGE_BAR_RADIUS,
+                }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function UsageDetailCard({ stats }: { stats: CodexStats }) {
   const insights = [
     stats.totalInputTokens > 0 && {
       label: "Input",
@@ -451,6 +476,19 @@ function InsightCard({ stats }: { stats: CodexStats }) {
       value: `${formatNumberFull(stats.totalReasoningTokens)} tok`,
     },
   ].filter(Boolean) as Array<{ label: string; value: string }>;
+
+  const dominantModel = stats.topModels[0]?.name ?? "N/A";
+  const dominantShare = Math.round(stats.dominantModelShare);
+  const switching = [
+    {
+      label: "Switches",
+      value: formatNumberFull(stats.modelSwitches),
+    },
+    {
+      label: "Dominant Share",
+      value: dominantModel === "N/A" ? `${dominantShare}%` : `${dominantShare}% ${dominantModel}`,
+    },
+  ];
 
   return (
     <div
@@ -508,8 +546,261 @@ function InsightCard({ stats }: { stats: CodexStats }) {
           </div>
         ))}
       </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: spacing[3] }}>
+        <span
+          style={{
+            fontSize: typography.size.sm,
+            fontWeight: typography.weight.bold,
+            color: colors.text.muted,
+            letterSpacing: typography.letterSpacing.wider,
+            textTransform: "uppercase",
+          }}
+        >
+          Model Switching
+        </span>
+        {switching.map((item) => (
+          <div
+            key={item.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: spacing[4],
+            }}
+          >
+            <span
+              style={{
+                fontSize: typography.size.md,
+                fontWeight: typography.weight.medium,
+                color: colors.text.tertiary,
+              }}
+            >
+              {item.label}
+            </span>
+            <span
+              style={{
+                fontSize: typography.size.md,
+                fontWeight: typography.weight.semibold,
+                color: colors.text.primary,
+              }}
+            >
+              {item.value}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
+}
+
+const TIME_DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const TIME_HOUR_LABELS = new Set([0, 6, 12, 18]);
+
+function TimeOfDayCard({ timeOfDayActivity }: { timeOfDayActivity: TimeOfDayActivity }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: spacing[5],
+        flex: 2,
+        backgroundColor: colors.surface,
+        border: `1px solid ${colors.surfaceBorder}`,
+        borderRadius: layout.radius.lg,
+        padding: spacing[6],
+      }}
+    >
+      <span
+        style={{
+          fontSize: components.sectionHeader.fontSize,
+          fontWeight: components.sectionHeader.fontWeight,
+          color: components.sectionHeader.color,
+          letterSpacing: components.sectionHeader.letterSpacing,
+          textTransform: components.sectionHeader.textTransform,
+        }}
+      >
+        Time of Day
+      </span>
+      <TimeOfDayHeatmap activity={timeOfDayActivity} />
+      <span
+        style={{
+          fontSize: typography.size.xs,
+          fontWeight: typography.weight.medium,
+          color: colors.text.muted,
+        }}
+      >
+        Tokens by hour (local time)
+      </span>
+    </div>
+  );
+}
+
+function TimeOfDayHeatmap({ activity }: { activity: TimeOfDayActivity }) {
+  const { counts, maxCount } = activity;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: spacing[2] }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: TIME_HEATMAP_GAP,
+          paddingLeft: TIME_HEATMAP_LABEL_WIDTH + spacing[2],
+        }}
+      >
+        {Array.from({ length: 24 }, (_, hour) => (
+          <div
+            key={hour}
+            style={{
+              display: "flex",
+              width: TIME_HEATMAP_CELL_SIZE,
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              fontSize: TIME_HEATMAP_LABEL_FONT,
+              color: colors.text.muted,
+            }}
+          >
+            {TIME_HOUR_LABELS.has(hour) ? hour : ""}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: TIME_HEATMAP_GAP }}>
+        {counts.map((row, dayIndex) => (
+          <div
+            key={TIME_DAY_LABELS[dayIndex] ?? dayIndex}
+            style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: spacing[2] }}
+          >
+            <span
+              style={{
+                width: TIME_HEATMAP_LABEL_WIDTH,
+                fontSize: TIME_HEATMAP_LABEL_FONT,
+                color: colors.text.muted,
+              }}
+            >
+              {TIME_DAY_LABELS[dayIndex] ?? ""}
+            </span>
+            <div style={{ display: "flex", flexDirection: "row", gap: TIME_HEATMAP_GAP }}>
+              {row.map((count, hourIndex) => {
+                const intensity = getIntensityLevel(count, maxCount) as keyof typeof HEATMAP_COLORS;
+                return (
+                  <div
+                    key={`${dayIndex}-${hourIndex}`}
+                    style={{
+                      display: "flex",
+                      width: TIME_HEATMAP_CELL_SIZE,
+                      height: TIME_HEATMAP_CELL_SIZE,
+                      backgroundColor: HEATMAP_COLORS[intensity],
+                      borderRadius: components.timeHeatmap.cellRadius,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TopProjectsCard({ projects }: { projects: ProjectStats[] }) {
+  const topProjects = projects.slice(0, 3);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: spacing[5],
+        flex: 1,
+        backgroundColor: colors.surface,
+        border: `1px solid ${colors.surfaceBorder}`,
+        borderRadius: layout.radius.lg,
+        padding: spacing[6],
+      }}
+    >
+      <span
+        style={{
+          fontSize: components.sectionHeader.fontSize,
+          fontWeight: components.sectionHeader.fontWeight,
+          color: components.sectionHeader.color,
+          letterSpacing: components.sectionHeader.letterSpacing,
+          textTransform: components.sectionHeader.textTransform,
+        }}
+      >
+        Top Projects
+      </span>
+      {topProjects.length === 0 ? (
+        <span
+          style={{
+            fontSize: typography.size.md,
+            fontWeight: typography.weight.medium,
+            color: colors.text.muted,
+          }}
+        >
+          No project data
+        </span>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: spacing[4] }}>
+          {topProjects.map((project, index) => (
+            <div
+              key={`${project.name}-${index}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: spacing[4],
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: spacing[3] }}>
+                <span
+                  style={{
+                    fontSize: typography.size.lg,
+                    fontWeight: typography.weight.bold,
+                    color: colors.text.tertiary,
+                    width: 28,
+                    textAlign: "right",
+                  }}
+                >
+                  {index + 1}
+                </span>
+                <span
+                  style={{
+                    fontSize: typography.size.base,
+                    fontWeight: typography.weight.medium,
+                    color: colors.text.primary,
+                  }}
+                >
+                  {formatProjectName(project.name)}
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: typography.size.sm,
+                  fontWeight: typography.weight.medium,
+                  color: colors.text.muted,
+                }}
+              >
+                {formatNumber(project.tokens)} tok
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatProjectName(path: string): string {
+  if (!path || path === "Unknown") return "Unknown";
+  const normalized = path.replace(/\\/g, "/");
+  const parts = normalized.split("/").filter(Boolean);
+  if (parts.length === 0) return "Unknown";
+  if (parts.length <= 2) return parts.join("/");
+  return `.../${parts.slice(-2).join("/")}`;
 }
 
 function StatsGrid({ stats }: { stats: CodexStats }) {

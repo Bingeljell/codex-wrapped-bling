@@ -122,6 +122,7 @@ async function main() {
     image = await generateImage(stats);
   } catch (error) {
     spinner.stop("Failed to generate image");
+    console.error(error instanceof Error ? error.stack : error)
     p.cancel(`Error generating image: ${error}`);
     process.exit(1);
   }

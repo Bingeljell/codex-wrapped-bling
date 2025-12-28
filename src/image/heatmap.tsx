@@ -59,6 +59,7 @@ function MonthLabelsRow({ labels }: { labels: MonthLabel[] }) {
         <div
           key={`${month}-${x}`}
           style={{
+            display: "flex",
             position: "absolute",
             left: x,
             fontSize: typography.size.sm,
@@ -184,6 +185,7 @@ function HeatmapLegend() {
           <div
             key={intensity}
             style={{
+              display: "flex",
               width: LEGEND_CELL_SIZE,
               height: LEGEND_CELL_SIZE,
               backgroundColor: HEATMAP_COLORS[intensity],

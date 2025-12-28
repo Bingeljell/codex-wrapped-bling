@@ -164,7 +164,7 @@ export const layout = {
   // Canvas dimensions
   canvas: {
     width: 1500,
-    height: 1400,
+    height: 1760,
   },
 
   // Container padding
@@ -258,6 +258,21 @@ export const components = {
     gap: spacing[4],
     logoSize: 32,
     logoBorderRadius: layout.radius.md,
+  },
+
+  // Time of day heatmap
+  timeHeatmap: {
+    cellSize: 12,
+    gap: 3,
+    labelWidth: 36,
+    labelFontSize: typography.size.xs,
+    cellRadius: layout.radius.sm,
+  },
+
+  // Usage bar chart
+  usageBar: {
+    height: 10,
+    radius: layout.radius.full,
   },
 } as const;
 
