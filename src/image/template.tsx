@@ -11,7 +11,13 @@ const GRID_GAP = spacing[5];
 const COL_WIDTH = (layout.content.width - GRID_GAP * 2) / 3;
 const TWO_COL_WIDTH = COL_WIDTH * 2 + GRID_GAP;
 
-export function WrappedTemplate({ stats }: { stats: CodexStats }) {
+export function WrappedTemplate({
+  stats,
+  hideProjects = false,
+}: {
+  stats: CodexStats;
+  hideProjects?: boolean;
+}) {
   return (
     <div
       style={{
@@ -120,7 +126,7 @@ export function WrappedTemplate({ stats }: { stats: CodexStats }) {
         }}
       >
         <TimeOfDayCard timeOfDayActivity={stats.timeOfDayActivity} width={TWO_COL_WIDTH} />
-        <TopProjectsCard projects={stats.projectUsage} width={COL_WIDTH} />
+        <TopProjectsCard projects={stats.projectUsage} width={COL_WIDTH} hidden={hideProjects} />
       </div>
 
       <StatsGrid stats={stats} />
@@ -728,7 +734,15 @@ function TimeOfDayHeatmap({ activity, cardWidth }: { activity: TimeOfDayActivity
   );
 }
 
-function TopProjectsCard({ projects, width }: { projects: ProjectStats[]; width: number }) {
+function TopProjectsCard({
+  projects,
+  width,
+  hidden = false,
+}: {
+  projects: ProjectStats[];
+  width: number;
+  hidden?: boolean;
+}) {
   const topProjects = projects.slice(0, 5);
 
   return (
@@ -756,7 +770,9 @@ function TopProjectsCard({ projects, width }: { projects: ProjectStats[]; width:
       >
         Top Projects
       </span>
-      {topProjects.length === 0 ? (
+      {hidden ? (
+        <HiddenProjectsContent />
+      ) : topProjects.length === 0 ? (
         <span
           style={{
             fontSize: typography.size.md,
@@ -813,6 +829,79 @@ function TopProjectsCard({ projects, width }: { projects: ProjectStats[]; width:
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function HiddenProjectsContent() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing[4],
+        paddingTop: spacing[4],
+        paddingBottom: spacing[4],
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-end", gap: spacing[4] }}>
+        <Ornament color={colors.accent.primary} size={56} />
+        <Ornament color={colors.accent.secondary} size={64} />
+        <Ornament color={colors.accent.tertiary} size={52} />
+      </div>
+      <span
+        style={{
+          fontSize: typography.size.sm,
+          fontWeight: typography.weight.medium,
+          color: colors.text.muted,
+          letterSpacing: typography.letterSpacing.wide,
+          textTransform: "uppercase",
+        }}
+      >
+        Projects hidden
+      </span>
+    </div>
+  );
+}
+
+function Ornament({ color, size }: { color: string; size: number }) {
+  const capWidth = Math.round(size * 0.5);
+  const capHeight = Math.round(size * 0.22);
+  const highlightSize = Math.round(size * 0.35);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: spacing[1] }}>
+      <div
+        style={{
+          width: capWidth,
+          height: capHeight,
+          backgroundColor: colors.surfaceBorder,
+          borderRadius: layout.radius.sm,
+        }}
+      />
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: layout.radius.full,
+          backgroundColor: color,
+          border: `1px solid ${colors.surfaceBorder}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            width: highlightSize,
+            height: highlightSize,
+            borderRadius: layout.radius.full,
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
+          }}
+        />
+      </div>
     </div>
   );
 }
