@@ -26,12 +26,14 @@ USAGE:
 
 OPTIONS:
   --year <YYYY>    Generate wrapped for a specific year (default: current year)
+  --no-projects    Hide project names in the image
   --help, -h       Show this help message
   --version, -v    Show version number
 
 EXAMPLES:
   codex-wrapped-christmas              # Generate current year wrapped
   codex-wrapped-christmas --year 2025  # Generate 2025 wrapped
+  codex-wrapped-christmas --no-projects # Hide project names
 `);
 }
 
@@ -41,6 +43,7 @@ async function main() {
     args: process.argv.slice(2),
     options: {
       year: { type: "string", short: "y" },
+      "no-projects": { type: "boolean" },
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
     },
@@ -59,6 +62,7 @@ async function main() {
   }
 
   p.intro("codex wrapped christmas");
+  const hideProjects = values["no-projects"] === true;
 
   const requestedYear = values.year ? parseInt(values.year, 10) : new Date().getFullYear();
 
@@ -119,7 +123,7 @@ async function main() {
 
   let image: { fullSize: Buffer; displaySize: Buffer };
   try {
-    image = await generateImage(stats);
+    image = await generateImage(stats, { hideProjects });
   } catch (error) {
     spinner.stop("Failed to generate image");
     console.error(error instanceof Error ? error.stack : error)

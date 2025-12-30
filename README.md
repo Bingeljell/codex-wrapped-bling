@@ -56,6 +56,7 @@ codex-wrapped-christmas
 | Option          | Description                          |
 | --------------- | ------------------------------------ |
 | `--year, -y`    | Generate wrapped for a specific year |
+| `--no-projects` | Hide project names in the image      |
 | `--help, -h`    | Show help message                    |
 | `--version, -v` | Show version number                  |
 

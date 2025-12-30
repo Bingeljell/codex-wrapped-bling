@@ -13,10 +13,13 @@ export interface GeneratedImage {
   displaySize: Buffer;
 }
 
-export async function generateImage(stats: CodexStats): Promise<GeneratedImage> {
+export async function generateImage(
+  stats: CodexStats,
+  options: { hideProjects?: boolean } = {}
+): Promise<GeneratedImage> {
   await initWasm(Bun.file(resvgWasm).arrayBuffer());
 
-  const svg = await satori(<WrappedTemplate stats={stats} />, {
+  const svg = await satori(<WrappedTemplate stats={stats} hideProjects={options.hideProjects} />, {
     width: layout.canvas.width,
     height: layout.canvas.height,
     fonts: await loadFonts(),

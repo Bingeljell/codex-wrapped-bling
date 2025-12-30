@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - **Top Projects**: Added a top-5 projects list ranked by token usage.
 - **Model Switching Stats**: Added total model switches and dominant model share to Usage Detail.
 - **Third-Party Notices**: Added third-party notices and the IBM Plex Mono OFL license text.
+- **Privacy Flag**: Added `--no-projects` to hide project names in the image.
 
 ### Changed
 - **Data Pipeline**: Collector and stats now track project usage, hourly activity, and full model usage totals.
