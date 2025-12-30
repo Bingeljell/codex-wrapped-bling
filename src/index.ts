@@ -206,7 +206,8 @@ function generateTweetUrl(stats: CodexStats): string {
   lines.push("");
   lines.push("Get yours: npx codex-wrapped-christmas");
   lines.push("");
-  lines.push("Credit: @nummanali @moddi3io");
+  lines.push("Fork: @Bingeljell");
+  lines.push("OG: @nummanali @moddi3io");
   lines.push("");
   lines.push("(Paste Image Stats with CMD / CTRL + V)");
 
