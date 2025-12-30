@@ -1,8 +1,10 @@
 #!/usr/bin/env bun
 
 import * as p from "@clack/prompts";
-import { join } from "node:path";
+import fs from "node:fs";
+import path, { join } from "node:path";
 import { parseArgs } from "node:util";
+import { fileURLToPath } from "node:url";
 
 import { checkCodexDataExists } from "./collector";
 import { calculateStats } from "./stats";
@@ -13,7 +15,19 @@ import { isWrappedAvailable } from "./utils/dates";
 import { formatCostFull, formatNumber, formatNumberFull } from "./utils/format";
 import type { CodexStats } from "./types";
 
-const VERSION = "1.0.0";
+const VERSION = readVersion();
+
+function readVersion(): string {
+  try {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const pkgPath = path.resolve(__dirname, "..", "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as { version?: string };
+    if (pkg.version) return pkg.version;
+  } catch {
+    // Fall back when packaged metadata isn't available.
+  }
+  return "unknown";
+}
 
 function printHelp() {
   console.log(`
@@ -209,7 +223,7 @@ function generateTweetUrl(stats: CodexStats): string {
   lines.push("Fork: @Bingeljell");
   lines.push("OG: @nummanali @moddi3io");
   lines.push("");
-  lines.push("(Paste Image Stats with CMD / CTRL + V)");
+  lines.push("(Paste Image: CMD/CTRL+V)");
 
   const text = lines.join("\n");
 

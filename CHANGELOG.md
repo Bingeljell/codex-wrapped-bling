@@ -24,3 +24,4 @@ All notable changes to this project will be documented in this file.
 - **Image Clipping**: Prevented the bottom stats row from getting cut off.
 - **npx Resolution**: Fixed binary lookup in the wrapper to find platform packages under npm's temp install layout.
 - **Publish Metadata**: Simplified `bin` entry to avoid npm stripping the CLI entry point.
+- **Version Reporting**: CLI now reads the packaged `package.json` to show the correct version.
