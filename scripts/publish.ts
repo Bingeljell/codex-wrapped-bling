@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs";
 
 import pkg from "../package.json";
-import { targetpackageName } from "./bunup-builds";
+import { getTargetName, targetpackageName, targets } from "./bunup-builds";
 import { buildTargets } from "./build";
 
 const dir = path.resolve(import.meta.dir, "..");
@@ -13,12 +13,25 @@ $.cwd(dir);
 
 const args = Bun.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const versionArg = args.find((arg) => !arg.startsWith("--"));
+const mainOnly = args.includes("--main-only");
+const platformVersion = getFlagValue(args, "--platform-version");
+const versionArg = args.find((arg, index) => {
+  if (arg.startsWith("--")) return false;
+  if (args[index - 1] === "--platform-version") return false;
+  return true;
+});
 // Append a prerelease suffix during dry runs to avoid "already published" errors
 const version = dryRun && versionArg ? `${versionArg}-dry-run.${Date.now()}` : versionArg;
 
 if (!version) {
-  console.error("Usage: bun run scripts/publish.ts <version> [--dry-run]");
+  console.error(
+    "Usage: bun run scripts/publish.ts <version> [--dry-run] [--main-only --platform-version <version>]"
+  );
+  process.exit(1);
+}
+
+if (mainOnly && !platformVersion) {
+  console.error("Missing --platform-version <version> when using --main-only");
   process.exit(1);
 }
 
@@ -38,27 +51,38 @@ if (dryRun) {
   console.log("⚠️  Dry run mode: no packages will be published to npm\n");
 }
 
-// Build all platforms
-const binaries = await buildTargets(version);
-
-// Smoke test on current platform
-const currentPlatform = process.platform === "win32" ? "windows" : process.platform;
-const currentArch = process.arch;
-const currentPackage = `${targetpackageName}-${currentPlatform}-${currentArch}`;
-const binaryExt = process.platform === "win32" ? ".exe" : "";
-const binaryPath = `./dist/${currentPackage}/bin/${targetpackageName}${binaryExt}`;
-
-if (fs.existsSync(binaryPath)) {
-  console.log(`\n🧪 Running smoke test: ${binaryPath} --version`);
-  try {
-    await $`${binaryPath} --version`;
-    console.log("   ✅ Smoke test passed");
-  } catch (error) {
-    console.error("   ❌ Smoke test failed:", error);
-    process.exit(1);
+function buildBinariesMap(versionForBinaries: string): Record<string, string> {
+  const binaries: Record<string, string> = {};
+  for (const item of targets) {
+    const name = getTargetName(item);
+    const pkgName = name.replace(targetpackageName, pkg.name);
+    binaries[pkgName] = versionForBinaries;
   }
-} else {
-  console.log(`\n⚠️  Skipping smoke test (no binary for current platform: ${currentPackage})`);
+  return binaries;
+}
+
+const binaries = mainOnly ? buildBinariesMap(platformVersion!) : await buildTargets(version);
+
+if (!mainOnly) {
+  // Smoke test on current platform
+  const currentPlatform = process.platform === "win32" ? "windows" : process.platform;
+  const currentArch = process.arch;
+  const currentPackage = `${targetpackageName}-${currentPlatform}-${currentArch}`;
+  const binaryExt = process.platform === "win32" ? ".exe" : "";
+  const binaryPath = `./dist/${currentPackage}/bin/${targetpackageName}${binaryExt}`;
+
+  if (fs.existsSync(binaryPath)) {
+    console.log(`\n🧪 Running smoke test: ${binaryPath} --version`);
+    try {
+      await $`${binaryPath} --version`;
+      console.log("   ✅ Smoke test passed");
+    } catch (error) {
+      console.error("   ❌ Smoke test failed:", error);
+      process.exit(1);
+    }
+  } else {
+    console.log(`\n⚠️  Skipping smoke test (no binary for current platform: ${currentPackage})`);
+  }
 }
 
 // Prepare main package
@@ -81,7 +105,7 @@ await Bun.file(`./dist/${targetpackageName}/package.json`).write(
       name: pkg.name,
       version,
       description: pkg.description,
-      bin: { [targetpackageName]: `./bin/${targetpackageName}` },
+      bin: `bin/${targetpackageName}`,
       scripts: { postinstall: "node ./postinstall.mjs" },
       optionalDependencies: binaries,
       repository: pkg.repository,
@@ -100,30 +124,34 @@ await Bun.file(`./dist/${targetpackageName}/package.json`).write(
 console.log("✅ Main package prepared");
 
 // Publish platform packages
-console.log("\n📤 Publishing platform packages...");
+if (mainOnly) {
+  console.log("\n⏭️  Skipping platform packages (--main-only)");
+} else {
+  console.log("\n📤 Publishing platform packages...");
 
-for (const [name] of Object.entries(binaries)) {
-  const targetPath = path.join(dir, "dist", name.replace(pkg.name, targetpackageName));
+  for (const [name] of Object.entries(binaries)) {
+    const targetPath = path.join(dir, "dist", name.replace(pkg.name, targetpackageName));
 
-  if (process.platform !== "win32") {
-    await $`chmod -R 755 .`.cwd(targetPath);
-  }
+    if (process.platform !== "win32") {
+      await $`chmod -R 755 .`.cwd(targetPath);
+    }
 
-  await $`mkdir -p ${path.join(targetPath, "assets")}`;
-  await $`cp -r assets/images ${path.join(targetPath, "assets/")}`;
-  await $`cp LICENSE ${path.join(targetPath, "LICENSE")}`;
-  await $`cp THIRD_PARTY_NOTICES.md ${path.join(targetPath, "THIRD_PARTY_NOTICES.md")}`;
-  await $`mkdir -p ${path.join(targetPath, "LICENSES")}`;
-  await $`cp LICENSES/IBM-Plex-Mono-OFL.txt ${path.join(targetPath, "LICENSES/IBM-Plex-Mono-OFL.txt")}`;
+    await $`mkdir -p ${path.join(targetPath, "assets")}`;
+    await $`cp -r assets/images ${path.join(targetPath, "assets/")}`;
+    await $`cp LICENSE ${path.join(targetPath, "LICENSE")}`;
+    await $`cp THIRD_PARTY_NOTICES.md ${path.join(targetPath, "THIRD_PARTY_NOTICES.md")}`;
+    await $`mkdir -p ${path.join(targetPath, "LICENSES")}`;
+    await $`cp LICENSES/IBM-Plex-Mono-OFL.txt ${path.join(targetPath, "LICENSES/IBM-Plex-Mono-OFL.txt")}`;
 
-  if (dryRun) {
-    await $`npm publish --access public --dry-run --tag dry-run`.cwd(targetPath);
-    console.log(`✅ Would publish ${name}`);
-  } else if (await isPublished(name, version)) {
-    console.log(`⏭️  Skipping ${name} (already published)`);
-  } else {
-    await $`npm publish --access public`.cwd(targetPath);
-    console.log(`✅ Published ${name}`);
+    if (dryRun) {
+      await $`npm publish --access public --dry-run --tag dry-run`.cwd(targetPath);
+      console.log(`✅ Would publish ${name}`);
+    } else if (await isPublished(name, version)) {
+      console.log(`⏭️  Skipping ${name} (already published)`);
+    } else {
+      await $`npm publish --access public`.cwd(targetPath);
+      console.log(`✅ Published ${name}`);
+    }
   }
 }
 
@@ -146,3 +174,11 @@ console.log(`\n${"─".repeat(50)}`);
 console.log(`\n✅ ${dryRun ? "Dry run" : "Publish"} complete!\n`);
 console.log(`Version: ${version}`);
 console.log(`Packages: ${Object.keys(binaries).length + 1}`);
+
+function getFlagValue(inputArgs: string[], flag: string): string | undefined {
+  const index = inputArgs.indexOf(flag);
+  if (index === -1) return undefined;
+  const value = inputArgs[index + 1];
+  if (!value || value.startsWith("--")) return undefined;
+  return value;
+}

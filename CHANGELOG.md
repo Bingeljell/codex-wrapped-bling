@@ -21,3 +21,5 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Satori Rendering**: Added explicit `display` styles to satisfy Satori's layout requirements.
 - **Image Clipping**: Prevented the bottom stats row from getting cut off.
+- **npx Resolution**: Fixed binary lookup in the wrapper to find platform packages under npm's temp install layout.
+- **Publish Metadata**: Simplified `bin` entry to avoid npm stripping the CLI entry point.

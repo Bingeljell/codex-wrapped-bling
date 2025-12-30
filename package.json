@@ -1,6 +1,6 @@
 {
   "name": "codex-wrapped-christmas",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "author": {
     "name": "Bingeljell",
     "email": "nikhil.shahane@proton.me",
@@ -23,9 +23,7 @@
   ],
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "codex-wrapped-christmas": "./bin/codex-wrapped-christmas"
-  },
+  "bin": "bin/codex-wrapped-christmas",
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun run --watch src/index.ts",

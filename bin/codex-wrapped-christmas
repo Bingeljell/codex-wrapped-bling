@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { platform as osPlatform, arch as osArch } from "node:os";
 import { fileURLToPath } from "node:url";
 
@@ -46,8 +46,14 @@ const binary =
 function findBinary(startDir) {
   let current = startDir;
   for (;;) {
-    const modules = join(current, "node_modules");
-    if (fs.existsSync(modules)) {
+    const moduleDirs = [];
+    if (basename(current) === "node_modules") {
+      moduleDirs.push(current);
+    }
+    moduleDirs.push(join(current, "node_modules"));
+
+    for (const modules of moduleDirs) {
+      if (!fs.existsSync(modules)) continue;
       const entries = fs.readdirSync(modules);
       for (const entry of entries) {
         if (!entry.startsWith(base)) {
